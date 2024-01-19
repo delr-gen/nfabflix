@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Fabflix Main Page</title>
+</head>
+
+<body>
+<h1>Movie Results</h1>
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="sortDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Sort
+    </button>
+    <div class="dropdown-menu" aria-labelledby="sortDropDown">
+      <button class="dropdown-item" type="button" onclick="sort('rating DESC, title DESC')">Rating ↓ Title ↓</button>
+      <button class="dropdown-item" type="button" onclick="sort('rating ASC, title DESC')">Rating ↑ Title ↓</button>
+      <button class="dropdown-item" type="button" onclick="sort('rating DESC, title ASC')">Rating ↓ Title ↑</button>
+      <button class="dropdown-item" type="button" onclick="sort('rating ASC, title ASC')">Rating ↑ Title ↑</button>
+      <button class="dropdown-item" type="button" onclick="sort('title DESC, rating DESC')">Title ↓ Rating ↓</button>
+      <button class="dropdown-item" type="button" onclick="sort('title ASC, rating DESC')">Title ↑ Rating ↓</button>
+      <button class="dropdown-item" type="button" onclick="sort('title DESC, rating ASC')">Title ↓ Rating ↑</button>
+      <button class="dropdown-item" type="button" onclick="sort('title ASC, rating ASC')">Title ↑ Rating ↑</button>
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="showDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Show
+    </button>
+    <div class="dropdown-menu" aria-labelledby="showDropDown">
+      <button class="dropdown-item" type="button" onclick="changeShow(10)">10</button>
+      <button class="dropdown-item" type="button" onclick="changeShow(25)">25</button>
+      <button class="dropdown-item" type="button" onclick="changeShow(50)">50</button>
+      <button class="dropdown-item" type="button" onclick="changeShow(100)">100</button>
+    </div>
+  </div>
+
+  <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Year</th>
+          <th scope="col">Director</th>
+          <th scope="col">Genres</th>
+          <th scope="col">Stars</th>
+          <th scope="col">Rating</th>
+        </tr>
+      </thead>
+      <tbody id="movies_tbody">
+      </tbody>
+  </table>
+
+  <button type="button" onclick="prev()" id="prev" disabled>Prev</button>
+  <button type="button" onclick="next()" id="next">Next</button>
+</body>
+
+</html>
+
+<!-- Load jQuery and Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- jQuery is required -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- include jquery autocomplete JS  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.4.11/jquery.autocomplete.min.js"></script>
+
+<script src="movies.js"></script>
