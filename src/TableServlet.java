@@ -8,6 +8,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -46,21 +48,52 @@ public class TableServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
 
+            int page = 0;
+            HttpSession session = request.getSession();
+            String pageTrue = (String) request.getParameter("page");
+
+            String movieTitle;
+            String movieYear;
+            String movieDirector;
+            String movieStar;
+            String genreId;
+            String sortBy;
+            int show;
+            //int page = Integer.valueOf(request.getParameter("page"));
+            if (pageTrue != null && !pageTrue.equals("")) {
+                page = Integer.valueOf(pageTrue);
+
+                movieTitle = (String) session.getAttribute("movieTitle");
+                movieYear = (String) session.getAttribute("movieYear");
+                movieDirector = (String) session.getAttribute("movieDirector");
+                movieStar = (String) session.getAttribute("movieStar");
+                genreId = (String) session.getAttribute("genreId");
+                sortBy = (String) session.getAttribute("sortBy");
+                show = Integer.parseInt(session.getAttribute("show").toString());
+            }
+            else {
+                // get parameters
+                movieTitle = request.getParameter("title");
+                movieYear = request.getParameter("year");
+                movieDirector = request.getParameter("director");
+                movieStar = request.getParameter("star");
+                genreId = request.getParameter("genreId");
+                sortBy = request.getParameter("sort");
+                show = Integer.valueOf(request.getParameter("show"));
+                
+                session.setAttribute("sortBy", sortBy);
+                session.setAttribute("show", show);
+            }
+
             String query = "";
             PreparedStatement statement = null;
 
-            // get parameters
-            String movieTitle = request.getParameter("title");
-            String movieYear = request.getParameter("year");
-            String movieDirector = request.getParameter("director");
-            String movieStar = request.getParameter("star");
-            String genreId = request.getParameter("genreId");
-            String sortBy = request.getParameter("sort");
-            int show = Integer.valueOf(request.getParameter("show"));
-            int page = Integer.valueOf(request.getParameter("page"));
-            if (genreId != null && genreId != "") {
+
+            if (genreId != null && !genreId.equals("")) {
                 genreId = genreId.strip();
-                query = "SELECT gm.movieId,title,year,director,rating from movies, ratings, genres, genres_in_movies AS gm WHERE movies.id=ratings.movieId AND gm.movieId=movies.id AND gm.genreId=genres.id AND genres.id=? ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                session.setAttribute("genreId", genreId);
+                movieStar = "";
+                query = "SELECT gm.movieId,title,year,director,rating from movies, ratings, genres, genres_in_movies AS gm WHERE movies.id=ratings.movieId AND gm.movieId=movies.id AND gm.genreId=genres.id AND genres.id=? ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);;
 
                 // Declare our statement
                 statement = conn.prepareStatement(query);
@@ -72,12 +105,17 @@ public class TableServlet extends HttpServlet {
                 movieDirector = movieDirector.strip();
                 movieStar = movieStar.strip();
 
+                session.setAttribute("movieTitle", movieTitle);
+                session.setAttribute("movieYear", movieYear);
+                session.setAttribute("movieDirector", movieDirector);
+                session.setAttribute("movieStar", movieStar);
+
                 String search = " title LIKE ? AND director LIKE ? ";
                 if (movieYear != "") {
                     search += "AND year=? ";
                 }
                 query = "SELECT movieId,title,year,director,rating from movies,ratings WHERE movies.id=ratings.movieId AND" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
-                if (movieStar!=null && movieStar != "") {
+                if (movieStar!=null && !movieStar.equals("")) {
                     search += "AND stars.name LIKE ? ";
                     query = "SELECT DISTINCT sm.movieId,title,year,director,rating from movies, ratings, stars, stars_in_movies AS sm WHERE sm.movieId=movies.id AND movies.id=ratings.movieId AND stars.id=sm.starId AND" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
                 }
@@ -89,11 +127,11 @@ public class TableServlet extends HttpServlet {
                 statement.setString(1, "%" + movieTitle + "%");
                 statement.setString(2, "%" + movieDirector + "%");
                 int index = 3;
-                if (movieYear!=null && movieYear != "") {
+                if (movieYear!=null && !movieYear.equals("")) {
                     statement.setInt(index, Integer.valueOf(movieYear));
                     index += 1;
                 }
-                if (movieStar!=null && movieStar != "") {
+                if (movieStar!=null && !movieStar.equals("")) {
                     statement.setString(index, "%" + movieStar + "%");
                 }
             }
@@ -156,6 +194,7 @@ public class TableServlet extends HttpServlet {
             statement.close();
             starStatement.close();
             genreStatement.close();
+            
 
             // Write JSON string to output
             out.write(jsonArray.toString());
@@ -170,6 +209,8 @@ public class TableServlet extends HttpServlet {
 
             // Log error to localhost log
             request.getServletContext().log("Error:", e);
+            e.printStackTrace();
+            
             // Set response status to 500 (Internal Server Error)
             response.setStatus(500);
         } finally {

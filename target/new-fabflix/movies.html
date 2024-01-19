@@ -14,7 +14,17 @@
 </head>
 
 <body>
-<h1>Movie Results</h1>
+
+  <!-- Search bar -->
+  <form>
+    <input type="text" id="title" placeholder="Title" value="">
+    <input type="number" id="year" placeholder="Year" value="">
+    <input type="text" id="director" placeholder="Director" value="">
+    <input type="text" id="star" placeholder="Star" value="">
+  </form>
+  <button onclick="search()">Submit</button>
+
+  <h1>Movie Results</h1>
   <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" id="sortDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       Sort

@@ -15,12 +15,18 @@ function getParameterByName(target) {
 }
 
 
+function search() {
+    let url = `movies.html?title=${$("#title").val()}&year=${$("#year").val()}&director=${$("#director").val()}&star=${$("#star").val()}`;
+    
+    document.location.href=url;
+}
+
+
 function makeQuery() {
-    console.log(show);
     $.ajax({
         method: "GET",
         dataType: "json",
-        url: `${url}&sort=${sortBy}&show=${show}&page=${page}`,
+        url: `${url}sort=${sortBy}&show=${show}`,
         success: (resultData) => handleMoviesResult(resultData)
     }
     );
@@ -50,23 +56,14 @@ function changeShow(showOption) {
 function prev() {
     if (page != 0) {
         page -= 1;
-        $('#next').prop('disabled', false);
+        document.location.href=`movies.html?page=${page}`;
     }
-    if (page == 0) {
-        $('#prev').prop('disabled', true);
-    }
-    clearTable();
-    makeQuery();
 }
 
 
 function next() {
     page += 1;
-    if (page != 0) {
-        $('#prev').prop('disabled', false);
-    }
-    clearTable();
-    makeQuery();
+    document.location.href=`movies.html?page=${page}`;
 }
 
 function clearTable() {
@@ -94,17 +91,33 @@ function handleMoviesResult(resultData) {
     if (resultData.length <= limit) {
         $('#next').prop('disabled', true);
     }
+    else {
+        $('#next').prop('disabled', false);
+    }
 }
 
 var url = "";
 var sortBy = "rating DESC, title ASC";
-var show = "20";
-var page = 0;
-if (getParameterByName("genreId") != null && getParameterByName("genreId") != "") {
-    url =  `api/movies?genreId=${getParameterByName("genreId")}`; 
+var show = "25";
+
+if (getParameterByName("page") != null && getParameterByName("page") != "") {
+    var page = Number(getParameterByName("page"));
+    url =  `api/movies?page=${page}&`; 
+}
+else if (getParameterByName("genreId") != null && getParameterByName("genreId") != "") {
+    var page = 0;
+    url =  `api/movies?genreId=${getParameterByName("genreId")}&`; 
 }
 else {
-    url = `api/movies?title=${getParameterByName("title")}&year=${getParameterByName("year")}&director=${getParameterByName("director")}&star=${getParameterByName("star")}`;
+    var page = 0;
+    url = `api/movies?title=${getParameterByName("title")}&year=${getParameterByName("year")}&director=${getParameterByName("director")}&star=${getParameterByName("star")}&`;
 }
 
 makeQuery();
+
+if (page == 0) {
+    $('#prev').prop('disabled', true);
+}
+else {
+    $('#prev').prop('disabled', false);
+}
