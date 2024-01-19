@@ -59,8 +59,18 @@ public class TableServlet extends HttpServlet {
             String genreId;
             String sortBy;
             int show;
-            //int page = Integer.valueOf(request.getParameter("page"));
-            if (pageTrue != null && !pageTrue.equals("")) {
+
+            if (request.getParameterMap().isEmpty()) {
+                movieTitle = (String) session.getAttribute("movieTitle");
+                movieYear = (String) session.getAttribute("movieYear");
+                movieDirector = (String) session.getAttribute("movieDirector");
+                movieStar = (String) session.getAttribute("movieStar");
+                genreId = (String) session.getAttribute("genreId");
+                sortBy = (String) session.getAttribute("sortBy");
+                show = (int) session.getAttribute("show");
+                page = (int) session.getAttribute("page");
+            }
+            else if (pageTrue != null && !pageTrue.equals("")) {
                 page = Integer.valueOf(pageTrue);
 
                 movieTitle = (String) session.getAttribute("movieTitle");
@@ -70,6 +80,7 @@ public class TableServlet extends HttpServlet {
                 genreId = (String) session.getAttribute("genreId");
                 sortBy = (String) session.getAttribute("sortBy");
                 show = Integer.parseInt(session.getAttribute("show").toString());
+                session.setAttribute("page", page);
             }
             else {
                 // get parameters
@@ -80,9 +91,10 @@ public class TableServlet extends HttpServlet {
                 genreId = request.getParameter("genreId");
                 sortBy = request.getParameter("sort");
                 show = Integer.valueOf(request.getParameter("show"));
-                
+
                 session.setAttribute("sortBy", sortBy);
                 session.setAttribute("show", show);
+                session.setAttribute("page", page);
             }
 
             String query = "";

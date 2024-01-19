@@ -26,7 +26,7 @@ function makeQuery() {
     $.ajax({
         method: "GET",
         dataType: "json",
-        url: `${url}sort=${sortBy}&show=${show}`,
+        url: url,
         success: (resultData) => handleMoviesResult(resultData)
     }
     );
@@ -66,10 +66,12 @@ function next() {
     document.location.href=`movies.html?page=${page}`;
 }
 
+
 function clearTable() {
     let movieTableBody = document.getElementById("movies_tbody");
     movieTableBody.innerHTML = "";
 }
+
 
 function handleMoviesResult(resultData) {
     let movieTableBody = $("#movies_tbody")
@@ -102,15 +104,18 @@ var show = "25";
 
 if (getParameterByName("page") != null && getParameterByName("page") != "") {
     var page = Number(getParameterByName("page"));
-    url =  `api/movies?page=${page}&`; 
+    url =  `api/movies?page=${page}&sort=${sortBy}&show=${show}`; 
 }
 else if (getParameterByName("genreId") != null && getParameterByName("genreId") != "") {
     var page = 0;
-    url =  `api/movies?genreId=${getParameterByName("genreId")}&`; 
+    url =  `api/movies?genreId=${getParameterByName("genreId")}&sort=${sortBy}&show=${show}`; 
+}
+else if (getParameterByName("session") != null && getParameterByName("session") == "true") {
+    url = "api/movies";
 }
 else {
     var page = 0;
-    url = `api/movies?title=${getParameterByName("title")}&year=${getParameterByName("year")}&director=${getParameterByName("director")}&star=${getParameterByName("star")}&`;
+    url = `api/movies?title=${getParameterByName("title")}&year=${getParameterByName("year")}&director=${getParameterByName("director")}&star=${getParameterByName("star")}&sort=${sortBy}&show=${show}`;
 }
 
 makeQuery();
