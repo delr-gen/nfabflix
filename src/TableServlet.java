@@ -50,7 +50,8 @@ public class TableServlet extends HttpServlet {
 
             int page = 0;
             HttpSession session = request.getSession();
-            String pageTrue = (String) request.getParameter("page");
+            String parameterPage = (String) request.getParameter("page");
+            String parameterShow = (String) request.getParameter("show");
 
             String movieTitle;
             String movieYear;
@@ -61,6 +62,7 @@ public class TableServlet extends HttpServlet {
             int show;
 
             if (request.getParameterMap().isEmpty()) {
+                // jump to main page
                 movieTitle = (String) session.getAttribute("movieTitle");
                 movieYear = (String) session.getAttribute("movieYear");
                 movieDirector = (String) session.getAttribute("movieDirector");
@@ -70,8 +72,8 @@ public class TableServlet extends HttpServlet {
                 show = (int) session.getAttribute("show");
                 page = (int) session.getAttribute("page");
             }
-            else if (pageTrue != null && !pageTrue.equals("")) {
-                page = Integer.valueOf(pageTrue);
+            else if (parameterPage != null && !parameterPage.equals("")) {
+                page = Integer.valueOf(parameterPage);
 
                 movieTitle = (String) session.getAttribute("movieTitle");
                 movieYear = (String) session.getAttribute("movieYear");
@@ -80,17 +82,32 @@ public class TableServlet extends HttpServlet {
                 genreId = (String) session.getAttribute("genreId");
                 sortBy = (String) session.getAttribute("sortBy");
                 show = Integer.parseInt(session.getAttribute("show").toString());
+
                 session.setAttribute("page", page);
             }
+            else if (parameterShow != null && !parameterShow.equals("")) {
+                show = Integer.valueOf(parameterShow);
+
+                movieTitle = (String) session.getAttribute("movieTitle");
+                movieYear = (String) session.getAttribute("movieYear");
+                movieDirector = (String) session.getAttribute("movieDirector");
+                movieStar = (String) session.getAttribute("movieStar");
+                genreId = (String) session.getAttribute("genreId");
+                sortBy = (String) session.getAttribute("sortBy");
+                page = Integer.parseInt(session.getAttribute("page").toString());
+
+                session.setAttribute("show", show);
+            }
             else {
-                // get parameters
+                // new search
+
                 movieTitle = request.getParameter("title");
                 movieYear = request.getParameter("year");
                 movieDirector = request.getParameter("director");
                 movieStar = request.getParameter("star");
                 genreId = request.getParameter("genreId");
                 sortBy = request.getParameter("sort");
-                show = Integer.valueOf(request.getParameter("show"));
+                show = 25;
 
                 session.setAttribute("sortBy", sortBy);
                 session.setAttribute("show", show);
@@ -121,6 +138,7 @@ public class TableServlet extends HttpServlet {
                 session.setAttribute("movieYear", movieYear);
                 session.setAttribute("movieDirector", movieDirector);
                 session.setAttribute("movieStar", movieStar);
+                session.removeAttribute("genreId");
 
                 String search = " title LIKE ? AND director LIKE ? ";
                 if (movieYear != "") {

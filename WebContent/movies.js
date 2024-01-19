@@ -44,12 +44,8 @@ function sort(sortOption) {
 
 
 function changeShow(showOption) {
-    show = showOption;
-    page = 0;
-    $('#prev').prop('disabled', true);
-    $('#next').prop('disabled', false);
-    clearTable();
-    makeQuery();
+    localStorage.setItem("show", showOption);
+    document.location.href=`movies.html?show=${showOption}`;
 }
 
 
@@ -76,7 +72,7 @@ function clearTable() {
 function handleMoviesResult(resultData) {
     let movieTableBody = $("#movies_tbody")
 
-    let limit = Number(show);
+    let limit = Number(localStorage.getItem("show"));
     for (let i = 0; i < resultData.length && i < limit; i ++) {
         let res = resultData[i];
         row = `<tr>
@@ -100,22 +96,33 @@ function handleMoviesResult(resultData) {
 
 var url = "";
 var sortBy = "rating DESC, title ASC";
-var show = "25";
 
-if (getParameterByName("page") != null && getParameterByName("page") != "") {
+if (getParameterByName("session") != null && getParameterByName("session") == "true") {
+    var page = Number(localStorage.getItem("page"));
+    url = "api/movies";
+}
+else if (getParameterByName("page") != null && getParameterByName("page") != "") {
     var page = Number(getParameterByName("page"));
-    url =  `api/movies?page=${page}&sort=${sortBy}&show=${show}`; 
+    localStorage.setItem("page", page);
+    url =  `api/movies?page=${page}`; 
+}
+else if (getParameterByName("show") != null && getParameterByName("show") != "") {
+    var page = 0;
+    localStorage.setItem("page", page);
+    let show = Number(getParameterByName("show"));
+    url =  `api/movies?show=${show}`; 
 }
 else if (getParameterByName("genreId") != null && getParameterByName("genreId") != "") {
     var page = 0;
-    url =  `api/movies?genreId=${getParameterByName("genreId")}&sort=${sortBy}&show=${show}`; 
-}
-else if (getParameterByName("session") != null && getParameterByName("session") == "true") {
-    url = "api/movies";
+    localStorage.setItem("show", 25);
+    localStorage.setItem("page", page);
+    url =  `api/movies?genreId=${getParameterByName("genreId")}&sort=${sortBy}`; 
 }
 else {
     var page = 0;
-    url = `api/movies?title=${getParameterByName("title")}&year=${getParameterByName("year")}&director=${getParameterByName("director")}&star=${getParameterByName("star")}&sort=${sortBy}&show=${show}`;
+    localStorage.setItem("show", 25);
+    localStorage.setItem("page", page);
+    url = `api/movies?title=${getParameterByName("title")}&year=${getParameterByName("year")}&director=${getParameterByName("director")}&star=${getParameterByName("star")}&sort=${sortBy}`;
 }
 
 makeQuery();
