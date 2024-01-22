@@ -100,7 +100,6 @@ public class TableServlet extends HttpServlet {
             }
             else {
                 // new search
-
                 movieTitle = request.getParameter("title");
                 movieYear = request.getParameter("year");
                 movieDirector = request.getParameter("director");

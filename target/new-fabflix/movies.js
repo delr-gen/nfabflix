@@ -69,6 +69,20 @@ function clearTable() {
 }
 
 
+function addMovie(movieId) {
+    $.ajax({
+        method: "POST",
+        dataType: "json",
+        url: `api/shopping-cart?item=${movieId}`,
+        success: (resultData) => {
+            console.log(resultData);
+            window.alert("Added Movie");
+        }
+    }
+    );
+}
+
+
 function handleMoviesResult(resultData) {
     let movieTableBody = $("#movies_tbody")
 
@@ -82,6 +96,7 @@ function handleMoviesResult(resultData) {
             <th>${res['movie_genres']}</th>
             <th>${res['movie_stars']}</th>
             <th>${res['movie_rating']}</th>
+            <th><button role="button" onclick="addMovie('${res['movie_id']}')">+</button></th>
         </tr>`;
         movieTableBody.append(row);
     }
@@ -98,7 +113,7 @@ var url = "";
 var sortBy = "rating DESC, title ASC";
 
 if (getParameterByName("session") != null && getParameterByName("session") == "true") {
-    var page = localStorage.getItem("page");
+    var page = Number(localStorage.getItem("page"));
     url = "api/movies";
 }
 else if (getParameterByName("page") != null && getParameterByName("page") != "") {
