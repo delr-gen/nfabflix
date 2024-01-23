@@ -76,7 +76,10 @@ function addMovie(movieId) {
         url: `api/shopping-cart?item=${movieId}`,
         success: (resultData) => {
             console.log(resultData);
-            window.alert("Added Movie");
+            window.alert("Added movie to cart");
+        },
+        error: (resultData) => {
+            window.alert("Unable to add movie to cart");
         }
     }
     );

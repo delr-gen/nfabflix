@@ -1,3 +1,4 @@
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import javax.naming.InitialContext;
@@ -11,6 +12,10 @@ import jakarta.servlet.http.HttpSession;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -28,6 +33,70 @@ public class ShoppingCartServlet extends HttpServlet {
         } catch (NamingException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+     * response)
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        response.setContentType("application/json"); // Response mime type
+
+        // Output stream to STDOUT
+        PrintWriter out = response.getWriter();
+
+        // Get a connection from dataSource and let resource manager close the connection after usage.
+        try (Connection conn = dataSource.getConnection()) {
+            // Get a connection from dataSource
+            HttpSession session = request.getSession();
+            TreeMap<String, Integer> previousItems = (TreeMap<String, Integer>) session.getAttribute("previousItems");
+
+            String query = "SELECT title FROM movies WHERE id=?";
+            PreparedStatement statement = conn.prepareStatement(query);
+
+            JsonArray jsonArray = new JsonArray();
+            for (Map.Entry<String,Integer> entry : previousItems.entrySet()) {
+                statement.setString(1, entry.getKey());
+                ResultSet rs = statement.executeQuery();
+
+                // Iterate through each row of rs
+                while (rs.next()) {
+                    String movieTitle = rs.getString("title");
+
+                    // Create a JsonObject based on the data we retrieve from rs
+
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("movieTitle", movieTitle);
+                    jsonObject.addProperty("quantity", entry.getValue());
+
+                    jsonArray.add(jsonObject);
+                }
+                rs.close();
+            }
+            statement.close();
+
+            // Write JSON string to output
+            out.write(jsonArray.toString());
+            // Set response status to 200 (OK)
+            response.setStatus(200);
+
+        } catch (Exception e) {
+            // Write error message JSON object to output
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("errorMessage", e.getMessage());
+            out.write(jsonObject.toString());
+
+            // Log error to localhost log
+            request.getServletContext().log("Error:", e);
+            // Set response status to 500 (Internal Server Error)
+            response.setStatus(500);
+        } finally {
+            out.close();
+        }
+
+        // Always remember to close db connection after usage. Here it's done by try-with-resources
+
     }
 
      /**
@@ -55,6 +124,7 @@ public class ShoppingCartServlet extends HttpServlet {
                     previousItems.put(item, 1);
                 }
             }
+            session.setAttribute("previousItems", previousItems);
         }
 
         JsonObject responseJsonObject = new JsonObject();
