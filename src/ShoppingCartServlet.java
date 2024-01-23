@@ -52,7 +52,7 @@ public class ShoppingCartServlet extends HttpServlet {
             HttpSession session = request.getSession();
             TreeMap<String, Integer> previousItems = (TreeMap<String, Integer>) session.getAttribute("previousItems");
 
-            String query = "SELECT title FROM movies WHERE id=?";
+            String query = "SELECT title, id FROM movies WHERE id=?";
             PreparedStatement statement = conn.prepareStatement(query);
 
             JsonArray jsonArray = new JsonArray();
@@ -63,11 +63,13 @@ public class ShoppingCartServlet extends HttpServlet {
                 // Iterate through each row of rs
                 while (rs.next()) {
                     String movieTitle = rs.getString("title");
+                    String movieId = rs.getString("id");
 
                     // Create a JsonObject based on the data we retrieve from rs
 
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("movieTitle", movieTitle);
+                    jsonObject.addProperty("movieId", movieId);
                     jsonObject.addProperty("quantity", entry.getValue());
 
                     jsonArray.add(jsonObject);
@@ -104,7 +106,6 @@ public class ShoppingCartServlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String item = request.getParameter("item");
-
         HttpSession session = request.getSession();
 
         // get the previous items in a ArrayList
@@ -112,21 +113,36 @@ public class ShoppingCartServlet extends HttpServlet {
         if (previousItems == null) {
             previousItems = new TreeMap<String, Integer>();
             previousItems.put(item, 1);
-            session.setAttribute("previousItems", previousItems);
-        } else {
+        } 
+        else {
+            String action = request.getParameter("action");
             // prevent corrupted states through sharing under multi-threads
             // will only be executed by one thread at a time
-            synchronized (previousItems) {
-                if (previousItems.containsKey(item)) {
-                    previousItems.replace(item, previousItems.get(item)+1);
-                }
-                else {
-                    previousItems.put(item, 1);
+            if (action.equals("subtract")) {
+                synchronized (previousItems) {
+                    if (previousItems.get(item) == 1) {
+                        previousItems.remove(item);
+                    }
+                    else {
+                        previousItems.replace(item, previousItems.get(item)-1); 
+                    }
                 }
             }
-            session.setAttribute("previousItems", previousItems);
+            else if (action.equals("remove")) {
+                previousItems.remove(item);
+            }
+            else if (action.equals("add")) {
+                synchronized (previousItems) {
+                    if (previousItems.containsKey(item)) {
+                        previousItems.replace(item, previousItems.get(item)+1);
+                    }
+                    else {
+                        previousItems.put(item, 1);
+                    }
+                }
+            }
         }
-
+        session.setAttribute("previousItems", previousItems);
         JsonObject responseJsonObject = new JsonObject();
 
         for (Map.Entry<String, Integer> entry : previousItems.entrySet()) {

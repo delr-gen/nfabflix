@@ -26,7 +26,7 @@ function addMovie(movieId) {
     $.ajax({
         method: "POST",
         dataType: "json",
-        url: `api/shopping-cart?item=${movieId}`,
+        url: `api/shopping-cart?item=${movieId}&action=add`,
         success: (resultData) => {
             console.log(resultData);
             window.alert("Added movie to cart");
