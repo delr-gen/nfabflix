@@ -170,7 +170,7 @@ public class TableServlet extends HttpServlet {
 
             JsonArray jsonArray = new JsonArray();
 
-            String starQuery = "SELECT starId,name FROM stars, stars_in_movies WHERE starId IN (SELECT starId FROM stars_in_movies WHERE movieId=? AND name LIKE ?) AND starId=id GROUP BY starId ORDER BY count(starId) DESC, name ASC LIMIT 3";
+            String starQuery = "SELECT starId,name FROM stars, stars_in_movies WHERE starId IN (SELECT starId FROM stars_in_movies WHERE movieId=?) AND name LIKE ? AND starId=id GROUP BY starId ORDER BY count(starId) DESC, name ASC LIMIT 3";
             PreparedStatement starStatement = conn.prepareStatement(starQuery);
             starStatement.setString(2, "%" + movieStar + "%");
 

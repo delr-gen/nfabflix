@@ -141,6 +141,11 @@ public class ShoppingCartServlet extends HttpServlet {
                     }
                 }
             }
+            else if (action.equals("empty")) {
+                synchronized (previousItems) {
+                    previousItems.clear();
+                }
+            }
         }
         session.setAttribute("previousItems", previousItems);
         JsonObject responseJsonObject = new JsonObject();
