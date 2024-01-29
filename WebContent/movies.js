@@ -50,18 +50,20 @@ function changeShow(showOption) {
 }
 
 
-function prev() {
+document.getElementById("prev").addEventListener("click", function(event) {
+    event.preventDefault();
     if (page != 0) {
         page -= 1;
         document.location.href=`movies.html?page=${page}`;
     }
-}
+});
 
 
-function next() {
+document.getElementById("next").addEventListener("click", function(event) {
+    event.preventDefault();
     page += 1;
     document.location.href=`movies.html?page=${page}`;
-}
+});
 
 
 function clearTable() {
