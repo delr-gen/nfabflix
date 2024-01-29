@@ -13,6 +13,7 @@ function handleGenreList(resultData) {
     }
 }
 
+
 $.ajax({
     method: "GET",
     dataType: "json",

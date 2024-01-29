@@ -35,12 +35,13 @@ function makeQuery() {
 
 
 function sort(sortOption) {
-    sortBy = sortOption;
-    page = 0;
-    $('#prev').prop('disabled', true);
-    $('#next').prop('disabled', false);
-    clearTable();
-    makeQuery();
+    // sortBy = sortOption;
+    // page = 0;
+    // $('#prev').prop('disabled', true);
+    // $('#next').prop('disabled', false);
+    // clearTable();
+    // makeQuery();
+    document.location.href = `movies.html?sort=${sortOption}`;
 }
 
 
@@ -133,11 +134,23 @@ else if (getParameterByName("show") != null && getParameterByName("show") != "")
     let show = Number(getParameterByName("show"));
     url =  `api/movies?show=${show}`; 
 }
+else if (getParameterByName("sort") != null && getParameterByName("sort") != "") {
+    var page = 0;
+    localStorage.setItem("page", page);
+    let sort = getParameterByName("sort");
+    url = `api/movies?sortBy=${sort}`;
+}
 else if (getParameterByName("genreId") != null && getParameterByName("genreId") != "") {
     var page = 0;
     localStorage.setItem("show", 25);
     localStorage.setItem("page", page);
     url =  `api/movies?genreId=${getParameterByName("genreId")}&sort=${sortBy}`; 
+}
+else if (getParameterByName("firstLetter") != null && getParameterByName("firstLetter") != "") {
+    var page = 0;
+    localStorage.setItem("show", 25);
+    localStorage.setItem("page", page);
+    url =  `api/movies?firstLetter=${getParameterByName("firstLetter")}&sort=${sortBy}`; 
 }
 else {
     var page = 0;
