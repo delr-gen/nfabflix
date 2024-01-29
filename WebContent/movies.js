@@ -1,3 +1,11 @@
+document.getElementById("searchForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    let url = `movies.html?title=${$("#title").val()}&year=${$("#year").val()}&director=${$("#director").val()}&star=${$("#star").val()}`;
+    
+    document.location.href=url;
+});
+
+
 function getParameterByName(target) {
     // Get request URL
     let url = window.location.href;
@@ -12,13 +20,6 @@ function getParameterByName(target) {
 
     // Return the decoded parameter value
     return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
-
-
-function search() {
-    let url = `movies.html?title=${$("#title").val()}&year=${$("#year").val()}&director=${$("#director").val()}&star=${$("#star").val()}`;
-    
-    document.location.href=url;
 }
 
 
