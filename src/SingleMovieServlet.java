@@ -47,7 +47,7 @@ public class SingleMovieServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
 
-            String query = "SELECT title,year,director,rating FROM movies, ratings WHERE movies.id=ratings.movieId AND movies.id=?";
+            String query = "SELECT title,year,director,rating FROM movies LEFT JOIN ratings ON (movies.id=ratings.movieId) WHERE movies.id=?";
             String movieId = request.getParameter("movieId");
 
             // Declare our statement

@@ -145,7 +145,7 @@ public class TableServlet extends HttpServlet {
                 session.removeAttribute("firstLetter");
 
                 movieStar = "";
-                query = "SELECT gm.movieId,title,year,director,rating from movies, ratings, genres, genres_in_movies AS gm WHERE movies.id=ratings.movieId AND gm.movieId=movies.id AND gm.genreId=genres.id AND genres.id=? ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                query = "SELECT id,title,year,director,rating FROM movies LEFT JOIN ratings ON (movies.id=ratings.movieId) JOIN genres_in_movies AS gm ON (gm.movieId=movies.id) WHERE gm.genreId=? ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
 
                 // Declare our statement
                 statement = conn.prepareStatement(query);
@@ -158,11 +158,11 @@ public class TableServlet extends HttpServlet {
                 movieStar = "";
 
                 if (firstLetter.equals("*")) {
-                    query = "SELECT movieId,title,year,director,rating FROM movies,ratings WHERE title REGEXP '^[^a-zA-Z0-9]+' AND movies.id=ratings.movieId ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                    query = "SELECT id,title,year,director,rating FROM movies LEFT JOIN ratings ON (movies.id=ratings.movieId) WHERE title REGEXP '^[^a-zA-Z0-9]+' ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
                     statement = conn.prepareStatement(query);
                 }
                 else {
-                    query = "SELECT movieId,title,year,director,rating FROM movies,ratings WHERE title LIKE ? AND movies.id=ratings.movieId ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                    query = "SELECT id,title,year,director,rating FROM movies LEFT JOIN ratings ON (movies.id=ratings.movieId) WHERE title LIKE ? ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
                     statement = conn.prepareStatement(query);
                     statement.setString(1, firstLetter + "%");
                 }
@@ -180,23 +180,46 @@ public class TableServlet extends HttpServlet {
                 session.removeAttribute("genreId");
                 session.removeAttribute("firstLetter");
 
-                String search = " title LIKE ? AND director LIKE ? ";
-                if (movieYear != "") {
-                    search += "AND year=? ";
+                //String search = " title LIKE ? AND director LIKE ? ";
+                String search = " ";
+                if (movieTitle != "") {
+                    search += "title LIKE ? ";
                 }
-                query = "SELECT movieId,title,year,director,rating from movies,ratings WHERE movies.id=ratings.movieId AND" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                if (movieDirector != "") {
+                    if (!search.equals(" ")) {
+                        search += "AND ";
+                    }
+                    search += "director LIKE ? ";
+                }
+                if (movieYear != "") {
+                    if (!search.equals(" ")) {
+                        search += "AND ";
+                    }
+                    search += "year=? ";
+                }
+                query = "SELECT id,title,year,director,rating FROM movies LEFT JOIN ratings ON (movies.id=ratings.movieId) WHERE" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+
                 if (movieStar!=null && !movieStar.equals("")) {
                     search += "AND stars.name LIKE ? ";
-                    query = "SELECT DISTINCT sm.movieId,title,year,director,rating from movies, ratings, stars, stars_in_movies AS sm WHERE sm.movieId=movies.id AND movies.id=ratings.movieId AND stars.id=sm.starId AND" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                    query = "SELECT DISTINCT sm.movieId,title,year,director,rating from movies, ratings, stars, stars_in_movies AS sm WHERE sm.movieId=movies.id AND movies.id=ratings.movieId AND stars.id=sm.starId" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
                 }
 
                 // Declare our statement
                 statement = conn.prepareStatement(query);
 
                 // Set parameters
-                statement.setString(1, "%" + movieTitle + "%");
-                statement.setString(2, "%" + movieDirector + "%");
-                int index = 3;
+                int index = 1;
+                if (movieTitle!=null && !movieTitle.equals("")) {
+                    statement.setString(1, "%" + movieTitle + "%");
+                    index += 1;
+                }
+                if (movieDirector!=null && !movieDirector.equals("")) {
+                    statement.setString(2, "%" + movieDirector + "%");
+                    index += 1;
+                }
+                //statement.setString(1, "%" + movieTitle + "%");
+                //statement.setString(2, "%" + movieDirector + "%");
+                //int index = 3;
                 if (movieYear!=null && !movieYear.equals("")) {
                     statement.setInt(index, Integer.valueOf(movieYear));
                     index += 1;
@@ -211,15 +234,15 @@ public class TableServlet extends HttpServlet {
 
             JsonArray jsonArray = new JsonArray();
 
-            String starQuery = "SELECT starId,name FROM stars, stars_in_movies WHERE starId IN (SELECT starId FROM stars_in_movies WHERE movieId=?) AND name LIKE ? AND starId=id GROUP BY starId ORDER BY count(starId) DESC, name ASC LIMIT 3";
+            String starQuery = "SELECT starId,name FROM stars, stars_in_movies WHERE starId IN (SELECT starId FROM stars_in_movies WHERE movieId=?) AND starId=id GROUP BY starId ORDER BY count(starId) DESC, name ASC LIMIT 3";
+            //String starQuery = "SELECT starId, name FROM stars_in_movies INNER JOIN stars ON starId=id WHERE movieId=? GROUP BY starId ORDER BY count(starId) DESC, name ASC LIMIT 3";
             PreparedStatement starStatement = conn.prepareStatement(starQuery);
-            starStatement.setString(2, "%" + movieStar + "%");
 
             String genreQuery = "SELECT name, genreId FROM genres, genres_in_movies AS gm WHERE movieId=? AND id=gm.genreId ORDER BY name LIMIT 3";
             PreparedStatement genreStatement = conn.prepareStatement(genreQuery);
             // Iterate through each row of rs
             while (rs.next()) {
-                String movieId = rs.getString("movieId");
+                String movieId = rs.getString("id");
                 movieTitle = rs.getString("title");
                 movieYear = rs.getString("year");
                 movieDirector = rs.getString("director");
