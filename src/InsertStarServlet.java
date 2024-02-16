@@ -1,5 +1,4 @@
 import com.google.gson.JsonObject;
-import com.mysql.cj.protocol.Resultset;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
 
 // Declaring a WebServlet called InsertStarServlet, which maps to url "/api/insert-star"
 @WebServlet(name = "InsertStarServlet", urlPatterns = "/_dashboard/api/insert-star")
@@ -46,31 +45,24 @@ public class InsertStarServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
 
-            String idQuery = "SELECT SUBSTRING(max(id),3) AS id FROM stars";
-            PreparedStatement idStatement = conn.prepareStatement(idQuery);
-            ResultSet rs = idStatement.executeQuery();
-            rs.next();
-            int id = Integer.valueOf(rs.getString("id")) + 1;
-
-            String insertProcedure = "{CALL add_star(?, ?, ?)}";
+            String insertProcedure = "{CALL add_star(?, ?)}";
             PreparedStatement statement = conn.prepareCall(insertProcedure);
 
             String name = request.getParameter("name").strip();
             String birthYear = request.getParameter("birthYear").strip();
-            
-            statement.setString(1, "nm" + id);
-            statement.setString(2, name);
+
+            statement.setString(1, name);
             if (birthYear.equals("")) {
-                statement.setNull(3, java.sql.Types.NULL);
+                statement.setNull(2, java.sql.Types.NULL);
             }
             else {
-                statement.setInt(3, Integer.valueOf(birthYear));
+                statement.setInt(2, Integer.valueOf(birthYear));
             }
 
             statement.executeQuery();
 
             statement.close();
-            out.write("nm" + id);
+
             // Set response status to 200 (OK)
             response.setStatus(200);
 

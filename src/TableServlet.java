@@ -210,11 +210,11 @@ public class TableServlet extends HttpServlet {
                 // Set parameters
                 int index = 1;
                 if (movieTitle!=null && !movieTitle.equals("")) {
-                    statement.setString(1, "%" + movieTitle + "%");
+                    statement.setString(index, "%" + movieTitle + "%");
                     index += 1;
                 }
                 if (movieDirector!=null && !movieDirector.equals("")) {
-                    statement.setString(2, "%" + movieDirector + "%");
+                    statement.setString(index, "%" + movieDirector + "%");
                     index += 1;
                 }
                 //statement.setString(1, "%" + movieTitle + "%");
