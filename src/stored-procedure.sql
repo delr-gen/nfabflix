@@ -33,7 +33,7 @@ BEGIN
     END IF;
 
     INSERT INTO genres_in_movies(genreId, movieId) SELECT id, movieId FROM genres WHERE name=genre;
-    INSERT INTO stars_in_movies(starId, movieId) SELECT id, movieId FROM stars WHERE name=starName LIMIT 1;
+    INSERT INTO stars_in_movies(starId, movieId) SELECT MAX(id), movieId FROM stars WHERE name=starName;
 END
 $$
 

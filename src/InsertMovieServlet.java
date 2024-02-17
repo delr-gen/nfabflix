@@ -2,6 +2,8 @@ import com.google.gson.JsonObject;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.naming.spi.DirStateFactory.Result;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -46,32 +48,60 @@ public class InsertMovieServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
 
-            String insertProcedure = "{CALL add_movie(?, ?, ?, ?, ?, ?)}";
-            PreparedStatement statement = conn.prepareCall(insertProcedure);
-
             String title = request.getParameter("title").strip();
             String year = request.getParameter("year").strip();
             String director = request.getParameter("director").strip();
             String starName = request.getParameter("movieStar").strip();
             String genre = request.getParameter("genre").strip();
 
-            PreparedStatement movieIdStatement = conn.prepareStatement("SELECT CONCAT('tt', CAST((CAST(SUBSTRING(max(id),3) AS UNSIGNED)+1) AS char(18))) AS id FROM movies");
-            ResultSet rs = movieIdStatement.executeQuery();
+            JsonObject jsonObject = new JsonObject();
+
+            PreparedStatement dupStatement = conn.prepareStatement("SELECT COUNT(*) AS count FROM movies WHERE title=? AND year=? AND director=?");
+            dupStatement.setString(1, title);
+            dupStatement.setInt(2, Integer.valueOf(year));
+            dupStatement.setString(3, director);
+            ResultSet rs = dupStatement.executeQuery();
             rs.next();
-            String movieId = rs.getString("id");
-            rs.close();
-            movieIdStatement.close();
+            if (rs.getInt("count") >= 1) {
+                jsonObject.addProperty("message", "Movie already exists");
+                out.write(jsonObject.toString());
+                rs.close();
+                dupStatement.close();
+            }
+            else {
+                rs.close();
+                dupStatement.close();
 
-            statement.setString(1, movieId);
-            statement.setString(2, title);
-            statement.setInt(3, Integer.valueOf(year));
-            statement.setString(4, director);
-            statement.setString(5, starName);
-            statement.setString(6, genre);
+                String insertProcedure = "{CALL add_movie(?, ?, ?, ?, ?, ?)}";
+                PreparedStatement statement = conn.prepareCall(insertProcedure);
+    
+                PreparedStatement movieIdStatement = conn.prepareStatement("SELECT CONCAT('tt', CAST((CAST(SUBSTRING(max(id),3) AS UNSIGNED)+1) AS char(18))) AS id FROM movies");
+                rs = movieIdStatement.executeQuery();
+                rs.next();
+                String movieId = rs.getString("id");
+                rs.close();
+                movieIdStatement.close();
+    
+                statement.setString(1, movieId);
+                statement.setString(2, title);
+                statement.setInt(3, Integer.valueOf(year));
+                statement.setString(4, director);
+                statement.setString(5, starName);
+                statement.setString(6, genre);
+    
+                statement.executeQuery();
+                statement.close();
 
-            statement.executeQuery();
+                // statement = conn.prepareStatement("SELECT MAX(stars.id) as starId, genres.id as genreId from stars, genres WHERE stars.name=? AND genres.name=?");
+                // statement.setString(1, starName);
+                // statement.setString(2, genre);
+                // rs = statement.executeQuery();
 
-            statement.close();
+                jsonObject.addProperty("message", "Added movieId " + movieId + ", starId " + starName + ", genreId " + genre);
+                //rs.close();
+                //statement.close();
+                out.write(jsonObject.toString());
+            }
 
             // Set response status to 200 (OK)
             response.setStatus(200);

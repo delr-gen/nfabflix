@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 
 // Declaring a WebServlet called InsertStarServlet, which maps to url "/api/insert-star"
@@ -60,8 +61,17 @@ public class InsertStarServlet extends HttpServlet {
             }
 
             statement.executeQuery();
-
             statement.close();
+
+            statement = conn.prepareStatement("SELECT MAX(id) AS id FROM stars WHERE name=?");
+            statement.setString(1, name);
+            ResultSet rs = statement.executeQuery();
+            rs.next();
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("id", rs.getString("id"));
+            out.write(jsonObject.toString());
+            statement.close();
+            rs.close();
 
             // Set response status to 200 (OK)
             response.setStatus(200);
