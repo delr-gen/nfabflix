@@ -92,12 +92,23 @@ public class InsertMovieServlet extends HttpServlet {
                 statement.executeQuery();
                 statement.close();
 
-                // statement = conn.prepareStatement("SELECT MAX(stars.id) as starId, genres.id as genreId from stars, genres WHERE stars.name=? AND genres.name=?");
-                // statement.setString(1, starName);
-                // statement.setString(2, genre);
-                // rs = statement.executeQuery();
+                statement = conn.prepareStatement("SELECT MAX(stars.id) as starId FROM stars WHERE stars.name=?");
+                statement.setString(1, starName);
+                rs = statement.executeQuery();
+                rs.next();
+                String starId = rs.getString("starId");
+                rs.close();
+                statement.close();
 
-                jsonObject.addProperty("message", "Added movieId " + movieId + ", starId " + starName + ", genreId " + genre);
+                statement = conn.prepareStatement("SELECT genres.id as genreId from genres WHERE genres.name=?");
+                statement.setString(1, genre);
+                rs = statement.executeQuery();
+                rs.next();
+                String genreId = rs.getString("genreId");
+                rs.close();
+                statement.close();
+
+                jsonObject.addProperty("message", "Added movieId " + movieId + ", starId " + starId + ", genreId " + genreId);
                 //rs.close();
                 //statement.close();
                 out.write(jsonObject.toString());
