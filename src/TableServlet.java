@@ -200,8 +200,12 @@ public class TableServlet extends HttpServlet {
                 query = "SELECT id,title,year,director,rating FROM movies LEFT JOIN ratings ON (movies.id=ratings.movieId) WHERE" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
 
                 if (movieStar!=null && !movieStar.equals("")) {
-                    search += "AND stars.name LIKE ? ";
-                    query = "SELECT DISTINCT sm.movieId,title,year,director,rating from movies, ratings, stars, stars_in_movies AS sm WHERE sm.movieId=movies.id AND movies.id=ratings.movieId AND stars.id=sm.starId" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                    if (!search.equals(" ")) {
+                        search += "AND ";
+                    }
+                    search += "stars.name LIKE ? ";
+                    //query = "SELECT DISTINCT sm.movieId AS id,title,year,director,rating from movies, ratings, stars, stars_in_movies AS sm WHERE sm.movieId=movies.id AND movies.id=ratings.movieId AND stars.id=sm.starId" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
+                    query = "SELECT sm.movieId AS id, title, year, director, rating FROM movies LEFT JOIN ratings ON (movies.id=ratings.movieId) JOIN stars_in_movies AS sm ON (sm.movieId=movies.id) JOIN stars ON (sm.starId=stars.id) WHERE" + search + "ORDER BY " + sortBy + " LIMIT " + Integer.toString(show+1) + " OFFSET " + Integer.toString(page * show);
                 }
 
                 // Declare our statement

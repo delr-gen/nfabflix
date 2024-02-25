@@ -5,7 +5,6 @@ document.getElementById("addStarForm").addEventListener("submit", function(event
         dataType: "json",
         url: `api/insert-star?name=${$("#star").val()}&birthYear=${$("#birthYear").val()}`,
         success: (resultData) => {
-            // print resultId
             window.alert(`Added star ${resultData["id"]}`);
             $("#star").val("");
             $("#birthYear").val("");

@@ -3,6 +3,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "name": "BatchInsert",
+      "request": "launch",
+      "mainClass": "BatchInsert",
+      "projectName": "new-fabflix"
+    },
+    {
+      "type": "java",
+      "name": "DomParser",
+      "request": "launch",
+      "mainClass": "DomParser",
+      "projectName": "new-fabflix"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",
