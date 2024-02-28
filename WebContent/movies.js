@@ -46,7 +46,7 @@ function sort(sortOption) {
 
 
 function changeShow(showOption) {
-    localStorage.setItem("show", showOption);
+    sessionStorage.setItem("show", showOption);
     document.location.href=`movies.html?show=${showOption}`;
 }
 
@@ -93,7 +93,7 @@ function addMovie(movieId) {
 function handleMoviesResult(resultData) {
     let movieTableBody = $("#movies_tbody")
 
-    let limit = Number(localStorage.getItem("show"));
+    let limit = Number(sessionStorage.getItem("show"));
     for (let i = 0; i < resultData.length && i < limit; i ++) {
         let res = resultData[i];
         row = `<tr>
@@ -120,42 +120,42 @@ var url = "";
 var sortBy = "rating DESC, title ASC";
 
 if (getParameterByName("session") != null && getParameterByName("session") == "true") {
-    var page = Number(localStorage.getItem("page"));
+    var page = Number(sessionStorage.getItem("page"));
     url = "api/movies";
 }
 else if (getParameterByName("page") != null && getParameterByName("page") != "") {
     var page = Number(getParameterByName("page"));
-    localStorage.setItem("page", page);
+    sessionStorage.setItem("page", page);
     url =  `api/movies?page=${page}`; 
 }
 else if (getParameterByName("show") != null && getParameterByName("show") != "") {
     var page = 0;
-    localStorage.setItem("page", page);
+    sessionStorage.setItem("page", page);
     let show = Number(getParameterByName("show"));
     url =  `api/movies?show=${show}`; 
 }
 else if (getParameterByName("sort") != null && getParameterByName("sort") != "") {
     var page = 0;
-    localStorage.setItem("page", page);
+    sessionStorage.setItem("page", page);
     let sort = getParameterByName("sort");
     url = `api/movies?sortBy=${sort}`;
 }
 else if (getParameterByName("genreId") != null && getParameterByName("genreId") != "") {
     var page = 0;
-    localStorage.setItem("show", 25);
-    localStorage.setItem("page", page);
+    sessionStorage.setItem("show", 25);
+    sessionStorage.setItem("page", page);
     url =  `api/movies?genreId=${getParameterByName("genreId")}&sort=${sortBy}`; 
 }
 else if (getParameterByName("firstLetter") != null && getParameterByName("firstLetter") != "") {
     var page = 0;
-    localStorage.setItem("show", 25);
-    localStorage.setItem("page", page);
+    sessionStorage.setItem("show", 25);
+    sessionStorage.setItem("page", page);
     url =  `api/movies?firstLetter=${getParameterByName("firstLetter")}&sort=${sortBy}`; 
 }
 else {
     var page = 0;
-    localStorage.setItem("show", 25);
-    localStorage.setItem("page", page);
+    sessionStorage.setItem("show", 25);
+    sessionStorage.setItem("page", page);
     url = `api/movies?title=${getParameterByName("title")}&year=${getParameterByName("year")}&director=${getParameterByName("director")}&star=${getParameterByName("star")}&sort=${sortBy}`;
 }
 
