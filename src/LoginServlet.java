@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,13 +34,36 @@ public class LoginServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try (Connection conn = dataSource.getConnection()){
+            String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+            System.out.println("gRecaptchaResponse=" + gRecaptchaResponse);
+
+            PrintWriter out = response.getWriter();
+            // Verify reCAPTCHA
+            JsonObject responseJsonObject = new JsonObject();
+            if (gRecaptchaResponse!=null) {
+                try {
+                    RecaptchaVerifyUtils.verify(gRecaptchaResponse);
+                } catch (Exception e) {
+                    // Login fail
+                    responseJsonObject.addProperty("status", "fail");
+                    // Log to localhost log
+                    request.getServletContext().log("Login failed");
+                    // sample error messages. in practice, it is not a good idea to tell user which one is incorrect/not exist.
+                    responseJsonObject.addProperty("message", "Failed captcha");
+
+                    out.write(responseJsonObject.toString());
+                    response.setStatus(200);
+                    out.close();
+                }
+            }
+
             String username = request.getParameter("username");
             String password = request.getParameter("password");
 
             /* This example only allows username/password to be test/test
             /  in the real project, you should talk to the database to verify username/password
             */
-            JsonObject responseJsonObject = new JsonObject();
+
             String loginQuery = "SELECT id FROM customers WHERE email=? AND password=? GROUP BY id";
             PreparedStatement ps = conn.prepareStatement(loginQuery);
             ps.setString(1, username);
