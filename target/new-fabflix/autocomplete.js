@@ -48,7 +48,6 @@ function handleLookupAjaxSuccess(data, query, doneCallback) {
 	
 	// parse the string into JSON
 	var jsonData = JSON.parse(data);
-	console.log(jsonData)
 	
 	// TODO: if you want to cache the result into a global variable you can do it here
     localStorage.setItem(query, data);
