@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.util.Map;
 import java.util.TreeMap;
 
+
 // Declaring a WebServlet called SingleStarServlet, which maps to url "/api/shopping-cart"
 @WebServlet(name = "ShoppingCartServlet", urlPatterns = "/api/shopping-cart")
 public class ShoppingCartServlet extends HttpServlet {
@@ -142,8 +143,50 @@ public class ShoppingCartServlet extends HttpServlet {
                 }
             }
             else if (action.equals("empty")) {
-                synchronized (previousItems) {
-                    previousItems.clear();
+                try (Connection conn = dataSource.getConnection()) {
+                    String maxIdQuery = "SELECT MAX(id) AS id FROM sales";
+                    PreparedStatement ps = conn.prepareStatement(maxIdQuery);
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    int maxId = rs.getInt("id");
+                    rs.close();
+                    ps.close();
+
+                    String customerId = ((User) session.getAttribute("user")).getId();
+  
+                    java.sql.Date sqlDate = new java.sql.Date(System.currentTimeMillis());
+
+                    String insertSale = "INSERT INTO sales(id, customerId, movieId, saleDate) VALUES (?, ?, ?, ?)";
+                    ps = conn.prepareStatement(insertSale);
+                    synchronized (previousItems) {
+                        for (String movieId: previousItems.keySet()) {
+                            for (int i = 0; i < previousItems.get(movieId); i++) {
+                                maxId++;
+                                ps.setInt(1,maxId);
+                                ps.setString(2, customerId);
+                                ps.setString(3, movieId);
+                                ps.setDate(4, sqlDate);
+
+                                ps.addBatch();
+                            }
+                        }
+                        ps.executeBatch();
+                        conn.commit();
+                        previousItems.clear();
+                        ps.close();
+                    }
+                } catch (Exception e) {
+                    // Write error message JSON object to output
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("errorMessage", e.getMessage());
+                    //out.write(jsonObject.toString());
+        
+                    // Log error to localhost log
+                    request.getServletContext().log("Error:", e);
+                    e.printStackTrace();
+                    
+                    // Set response status to 500 (Internal Server Error)
+                    response.setStatus(500);
                 }
             }
         }
