@@ -8,6 +8,7 @@
 /Users/gen/Desktop/fabflix/new-fabflix/src/InsertStarServlet.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/MovieSuggestion.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/UpdateSecurePassword.java
+/Users/gen/Desktop/fabflix/new-fabflix/src/EmployeeLoginFilter.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/LoginServlet.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/LoginFilter.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/User.java
@@ -15,5 +16,6 @@
 /Users/gen/Desktop/fabflix/new-fabflix/src/SingleStarServlet.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/Movie.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/DomParser.java
+/Users/gen/Desktop/fabflix/new-fabflix/src/EmployeeLoginServlet.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/TableServlet.java
 /Users/gen/Desktop/fabflix/new-fabflix/src/RecaptchaVerifyUtils.java

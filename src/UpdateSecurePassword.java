@@ -71,11 +71,56 @@ public class UpdateSecurePassword {
         }
         System.out.println("updating password completed, " + count + " rows affected");
 
+        //statement.close();
+
+        System.out.println("finished customer encrpytion");
+
+        
+        // change the customers table password column from VARCHAR(20) to VARCHAR(128)
+        alterQuery = "ALTER TABLE employees MODIFY COLUMN password VARCHAR(128)";
+        alterResult = statement.executeUpdate(alterQuery);
+        System.out.println("altering employees table schema completed, " + alterResult + " rows affected");
+
+        // get the ID and password for each customer
+        query = "SELECT email, password from employees";
+
+        rs = statement.executeQuery(query);
+
+        // we use the StrongPasswordEncryptor from jasypt library (Java Simplified Encryption) 
+        //  it internally use SHA-256 algorithm and 10,000 iterations to calculate the encrypted password
+        //PasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
+
+        updateQueryList = new ArrayList<>();
+
+        System.out.println("encrypting password (this might take a while)");
+        while (rs.next()) {
+            // get the ID and plain text password from current table
+            String email = rs.getString("email");
+            String password = rs.getString("password");
+            
+            // encrypt the password using StrongPasswordEncryptor
+            String encryptedPassword = passwordEncryptor.encryptPassword(password);
+
+            // generate the update query
+            String updateQuery = String.format("UPDATE employees SET password='%s' WHERE email='%s';", encryptedPassword,
+                    email);
+            updateQueryList.add(updateQuery);
+        }
+        rs.close();
+
+        // execute the update queries to update the password
+        System.out.println("updating password");
+        count = 0;
+        for (String updateQuery : updateQueryList) {
+            int updateResult = statement.executeUpdate(updateQuery);
+            count += updateResult;
+        }
+        System.out.println("updating password completed, " + count + " rows affected");
+
         statement.close();
         connection.close();
 
-        System.out.println("finished");
-
+        System.out.println("finished employee encrpytion");
     }
 
 }
