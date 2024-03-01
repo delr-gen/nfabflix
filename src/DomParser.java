@@ -20,24 +20,26 @@ public class DomParser {
     public void run() {
         try {
             // parse the xml file and get the dom object
+            BatchInsert batchInsert = new BatchInsert();
+
             parseXmlFile("xml/mains243.xml");
             parseMovieDocument();
             System.out.println("Done parsing mains243.xml");
+            batchInsert.insertMovies(movies);
+            System.out.println("Finished inserting movies");
 
             parseXmlFile("xml/casts124.xml");
             parseStarDocument();
             System.out.println("Done parsing casts124.xml");
+            batchInsert.insertStars(stars);
+            System.out.println("Finished inserting stars");
 
-            BatchInsert batchInsert = new BatchInsert(movies, stars);
-            batchInsert.insertData();
-            System.out.println("Done inserting data");
+            batchInsert.closeConnection();
         }
         catch (Exception e){
             e.printStackTrace();
             return;
         }
-
-
     }
 
     private void parseXmlFile(String fileName) {

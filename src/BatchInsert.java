@@ -7,17 +7,12 @@ import java.sql.SQLException;
 
 
 public class BatchInsert {
-    private List<Movie> movieList = null;
-    private List<StarInMovie> starList = null;
-
     private Connection conn = null;
-    public BatchInsert(List<Movie> movieList, List<StarInMovie> starList) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    public BatchInsert() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
         Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
         String jdbcURL="jdbc:mysql://localhost:3306/moviedb";
 
-        this.movieList = movieList;
-        this.starList = starList;
 
         try {
             conn = DriverManager.getConnection(jdbcURL,"mytestuser", "testUser1");
@@ -26,7 +21,7 @@ public class BatchInsert {
         }
     }
 
-    public void insertData() {
+    public void insertMovies(List<Movie> movieList) {
         int[] iNoRows = null;
 
         // insert movies
@@ -88,7 +83,7 @@ public class BatchInsert {
                     psInsertGenreInMovie.addBatch();
                 }
 
-                if (i == 60) {
+                if (i == 50) {
                     iNoRows = psInsertMovie.executeBatch();
                     psInsertGenre.executeBatch();
                     psInsertGenreInMovie.executeBatch();
@@ -107,7 +102,22 @@ public class BatchInsert {
         }
         System.out.println("Done with movie batch");
 
+        try {
+            conn.commit();     
 
+            if(psInsertMovie!=null) psInsertMovie.close();
+            if(psInsertGenre!=null) psInsertGenre.close();
+            if(psInsertGenreInMovie!=null) psInsertGenreInMovie.close();
+
+            //if(conn!=null) conn.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertStars(List<StarInMovie> starList) {
+        int[] iNoRows = null;
+        
         // insert stars
         PreparedStatement psInsertStar = null;
         PreparedStatement psInsertStarInMovie = null;
@@ -159,7 +169,7 @@ public class BatchInsert {
 
                 maxStarId++;
 
-                if (i == 60) {
+                if (i == 50) {
                     iNoRows = psInsertStar.executeBatch();
                     psInsertStarInMovie.executeBatch();
          
@@ -179,24 +189,24 @@ public class BatchInsert {
         System.out.println("Done with stars batch");
         try {
             conn.commit();     
-
-            if(psInsertMovie!=null) psInsertMovie.close();
-            if(psInsertGenre!=null) psInsertGenre.close();
-            if(psInsertGenreInMovie!=null) psInsertGenreInMovie.close();
-            if(psGenreExists!=null) psGenreExists.close();
             
             if(psInsertStar!=null) psInsertStar.close();
             if(psInsertStarInMovie!=null) psInsertStarInMovie.close();
             if(psGetStarId!=null) psGetStarId.close();
             if(psStarExists!=null)  psStarExists.close();
-
-            psGenreExists.close();
-            
-            if(conn!=null) conn.close();
+            //if(conn!=null) conn.close();
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
-}
 
+    public void closeConnection() {
+        try {
+            if (conn!=null) conn.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
 
