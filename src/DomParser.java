@@ -27,6 +27,7 @@ public class DomParser {
             System.out.println("Done parsing mains243.xml");
             batchInsert.insertMovies(movies);
             System.out.println("Finished inserting movies");
+            movies.clear();
 
             parseXmlFile("xml/casts124.xml");
             parseStarDocument();
